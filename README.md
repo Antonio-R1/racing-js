@@ -10,13 +10,13 @@ a 3D browser game
 
 ### Island
 ![Game Island](img/game_island.gif)
-- See the controls for the walking and the vehicles below.
+- See the controls for walking and the vehicles below.
 - Try to pass through as many spheres as possible before the fuel of the airplane finishes.
 - The blues spheres fill up the fuel of the airplane.
 
 ### Race (Multiplayer)
 This game is not finished and will be added later.
-Preview
+#### Preview:
 ![Game Race](img/game_race.jpg)
 
 ## Controls
