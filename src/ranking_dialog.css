@@ -1,0 +1,90 @@
+
+#div_ranking_dialog {
+   top: 50%;
+   left: 50%;
+   position: absolute;
+   width: 1235px;
+   height: 750px;
+   z-index: 256;
+   background: rgba(0,0,255,0.85);
+   border: solid white;
+   border-radius: 25px;
+   user-select: none;
+   display: none;
+}
+
+#div_ranking_dialog_title {
+   padding: 10px;
+   font-size: xx-large;
+   border-top-left-radius: 25px;
+   border-top-right-radius: 25px;
+   border-bottom: solid black;
+   background: rgba(75,75,75,0.85);
+}
+
+#div_ranking_dialog_content {
+   margin: 5px;
+   width: calc(100% - 10px);
+   height: 75%;
+   font-size: large;
+   overflow-y: auto;
+}
+
+#div_inputs_ranking_dialog_tabs input[type="radio"] {
+    display: none;
+}
+
+#div_inputs_ranking_dialog_tabs input[type="radio"] + label {
+    margin-top: 5px;
+    padding: 5px;
+    font-size: x-large;
+    background: rgba(128,128,128,1);
+}
+
+#div_inputs_ranking_dialog_tabs input[type="radio"]:checked + label {
+    background: rgba(175,175,175,1);
+}
+
+.table_ranking {
+   height: 100%;
+   width: 100%;
+   background: white;
+   font-size: x-large;
+}
+
+#table_ranking_today {
+   display: none;
+}
+
+#table_checkpoints_ranking {
+   display: none;
+}
+
+#table_checkpoints_timing {
+   display: none;
+}
+
+#table_ranking_all {
+   display: none;
+}
+
+#div_ranking_dialog_buttons {
+   width: calc(100% - 20px);
+   text-align: right;
+   padding: 10px;
+   padding-bottom: 25px;
+   border-bottom-left-radius: 25px;
+   border-bottom-right-radius: 25px;
+}
+
+#div_inputs_ranking_dialog_tabs {
+   margin: 5px;
+}
+
+.button_ranking_dialog {
+   font-size: x-large;
+}
+
+#button_ranking_dialog_current {
+   margin: 5px;
+}

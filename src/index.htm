@@ -1,0 +1,836 @@
+<!DOCTYPE html>
+<html>
+<head>
+
+<meta charset=utf-8>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+
+<title>Game</title>
+
+<link rel="stylesheet" href="settings_menu/settings_menu.css">
+<link rel="stylesheet" href="pause_dialog.css">
+<link rel="stylesheet" href="message_dialog.css">
+<link rel="stylesheet" href="ranking_dialog.css">
+<link rel="stylesheet" href="username_dialog.css">
+
+<style type="text/css">
+
+#div_plane_centering {
+   margin-right: auto;
+   margin-left: auto;
+   width: 75%;
+   position: relative;
+}
+
+#div_plane {
+   position: relative;
+}
+
+#div_loading_screen {
+   top: 0px;
+   left: 0px;
+   width: 100%;
+   height: 100%;
+   z-index: 256;
+   background-image: url("images/loading_screen.jpg");
+   background-size: cover;
+   position: absolute;
+   user-select: none;
+}
+
+#div_loading_screen_progress_bar {
+   top: 50%;
+   left: 50%;
+   transform: translateX(-50%) translateY(-50%);
+   width: 250px;
+   padding: 10px;
+   position: absolute;
+   vertical-align: middle;
+   border-radius: 5px;
+   background: linear-gradient(90deg, green, white 0%);
+}
+
+#div_menu_bar {
+   top: 10px;
+   left: 100px;
+   z-index: 256;
+   position: absolute;
+   user-select: none;
+   display: none;
+}
+
+#meter_fuel {
+   width: 100px;
+}
+
+#meter_fuel::-webkit-meter-suboptimum-value {
+   background: red;
+}
+
+#div_camera {
+   display: inline-block;
+}
+
+#div_camera_position {
+   vertical-align: top;
+   display: inline-block;
+}
+
+#div_camera_position > span {
+   display: block;
+}
+
+#span_camera_position_title {
+   font-size: large;
+}
+
+#span_camera_position_selected {
+   border: 1px solid black;
+   background: rgba(175,175,175,0.25);
+}
+
+#camera_button {
+   width: 100px;
+   height: 75px;
+   background: transparent;
+   background-image: url('images/camera.svg');
+   background-repeat: no-repeat;
+   background-size: contain;
+   cursor: pointer;
+   overflow: hidden;
+   border: 0px;
+}
+
+#rocket_button {
+   width: 25px;
+   height: 25px;
+   background: transparent;
+   background-image: url('images/rocket.svg');
+   background-repeat: no-repeat;
+   background-size: contain;
+   cursor: pointer;
+   overflow: hidden;
+   border: 0px;
+   display: none;
+}
+
+#div_throttle {
+   top: 28.25%;
+   right: 0.25%;
+   width: 8.25%;
+   height: 63.5%;
+   margin: 0px;
+   background-color: gray;
+   z-index: 256;
+   opacity: 0.35;
+   position: absolute;
+   display: none;
+}
+
+#canvas_height_map {
+   top: 100px;
+   left: 100px;
+   opacity: 0.75;
+   z-index: 256;
+   position: absolute;
+   display: none;
+}
+
+</style>
+
+<script src="three_js/stats.js"></script>
+<script src="settings_menu/settings_menu.js"></script>
+<script src="ammo.js/ammo.wasm.js"></script>
+<script src="message_dialog.js"></script>
+<script src="ranking_dialog.js"></script>
+<script src="username_dialog.js"></script>
+
+<script type="module">
+import * as THREE from './three_js/build/three.module.js';
+import {SoundGeneratorAudioListener, EngineSoundGenerator} from './sound/sound_generator_worklet.js';
+import Game from './game.js';
+import GameFlightOverTheMountains from './game_mountains.js';
+import GameIsland from './game_island.js';
+import Car from './car.js'
+import Pilot from './pilot.js'
+import Island from './island.js';
+import {Menu} from './menu.js';
+import './pause_dialog.js';
+import Plane from './plane.js';
+import FlightInstruments from './flight_instruments.js';
+import Airport from './airport.js';
+import Runway from './runway.js';
+import Barrel from './barrel.js';
+import Coin from './coin.js';
+import Rocket from './rocket.js';
+
+function moduleInitAmmo () {
+   Ammo().then (moduleInit);
+}
+
+function moduleInit () {
+   rankingDialog = new RankingDialog();
+   usernameRecordDialog = new UsernameRecordDialog();
+
+   scene = new THREE.Scene();
+   canvas = document.getElementById ("canvas_plane");
+   renderer = new THREE.WebGLRenderer({canvas: canvas, antialias: true});
+   camera = new THREE.PerspectiveCamera(75, window.innerWidth/window.innerHeight, 0.1, 1000);
+   camera.position.x = 0;
+   camera.position.y = 5;
+   camera.position.z = 15;
+   set_canvas_size();
+   renderer.setClearColor(0x0000ff, 1);
+
+   raycaster = new THREE.Raycaster ();
+   mouse_vector = new THREE.Vector2 ();
+
+   spanScore = document.getElementById ("span_score");
+   meterFuel = document.getElementById ("meter_fuel");
+
+   let progressBar = document.getElementById("div_loading_screen_progress_bar");
+
+   var loadingManager = new THREE.LoadingManager();
+   loadingManager.onStart = function (url, itemsLoaded, itemsTotal) {
+      console.log( 'Started loading file\nLoaded ' + itemsLoaded + ' of ' + itemsTotal + ' files.' );
+   };
+
+   loadingManager.onProgress = function (url, itemsLoaded, itemsTotal) {
+      console.log( 'Loading file\nLoaded ' + itemsLoaded + ' of ' + itemsTotal + ' files.' );
+      progressBar.innerHTML = "Loading... (file "+itemsLoaded+" of "+itemsTotal+" files)";
+      progressBar.style.background = "linear-gradient(90deg, green, green "+(itemsLoaded/itemsTotal*100)+"%, white "+((itemsLoaded+10)/itemsTotal*100)+"%)";
+   };
+
+   loadingManager.onLoad = function () {
+      let loadingScreen = document.getElementById("div_loading_screen");
+      loadingScreen.style.display = "none";
+      canvas.focus();
+      menu.show ();
+   };
+
+   loadingManager.error = function (url, itemsLoaded, itemsTotal) {
+      window.alert ("An error occured while loading files.");
+   };
+
+   canvas.addEventListener("keydown", canvasKeyDown, true);
+   canvas.addEventListener("keyup", canvasKeyUp, true);
+   canvas.addEventListener("click", canvasClick, true);
+   canvas.addEventListener("mousemove", canvasMouseMove, true);
+   canvas.addEventListener("mousedown", canvasMouseDown, true);
+   canvas.addEventListener("mouseup", canvasMouseUp, true);
+   canvas.addEventListener("touchstart", canvasMouseDown, true);
+   canvas.addEventListener("touchend", canvasMouseUp, true);
+
+   divThrottle = document.getElementById ("div_throttle");
+   divThrottle.addEventListener ("mousedown", divThrottleOnMouseDown, true);
+   document.addEventListener ("mouseup", onMouseUp, true);
+   document.body.addEventListener ("mouseleave", onMouseLeave, true);
+   document.addEventListener ("mousemove", onMouseMove, true);
+
+   let inputVolume = document.getElementById("input_volume");
+   inputVolume.addEventListener("input", updateVolume);
+
+   var ambientLight = new THREE.AmbientLight(0xffffff, 1.0);
+   scene.add(ambientLight);
+
+   var directionalLight = new THREE.DirectionalLight(0xffffff, 5.0);
+   directionalLight.position.x = 1000;
+   directionalLight.position.y = 1000;
+   scene.add(directionalLight);
+
+   stats = new Stats ();
+   stats.showPanel (0);
+   let div = document.getElementById ("div_plane");
+   div.addEventListener("focusin", resume);
+   div.addEventListener("focusout", pause);
+   canvas.focus();
+   stats.dom.style.position = "absolute";
+   div.appendChild (stats.dom);
+
+   var fontLoader = new THREE.FontLoader (loadingManager);
+   fontLoader.load ("three_js/fonts/optimer_regular.typeface.json", function (loaded_font) {
+      font = loaded_font;
+   });
+
+   soundGeneratorAudioListener = new SoundGeneratorAudioListener();
+   camera.add (soundGeneratorAudioListener);
+
+   var menu = new Menu (loadingManager);
+   var plane = new Plane ({loadingManager: loadingManager});
+   var runway = new Runway (loadingManager);
+   var flightInstruments = new FlightInstruments (loadingManager);
+   var airport = new Airport (loadingManager);
+   var pilot = new Pilot({loadingManager: loadingManager});
+   var car = new Car({loadingManager: loadingManager});
+   var barrel = new Barrel (loadingManager);
+   var coin = new Coin (loadingManager);
+   var rocket = new Rocket (loadingManager);
+   var island = new Island (loadingManager);
+
+   EngineSoundGenerator.load (loadingManager, soundGeneratorAudioListener);
+
+   cameraPositionSpans = document.getElementById ("div_camera_position").getElementsByTagName ("span");
+
+   animate ();
+}
+
+function animate () {
+
+   if (paused) {
+      animationFrameRequested = false;
+      return;
+   }
+
+   animationFrameRequested = true;
+
+   if (throttleFps) {
+      window.setTimeout (requestAnimationFrame, frameInterval, animate);
+   }
+   else {
+      requestAnimationFrame(animate);
+   }
+   stats.begin ();
+
+   if (current_scene != undefined) {
+      current_scene.animate ();
+   }
+
+   renderer.render(scene, camera);
+   stats.end ();
+}
+
+document.addEventListener("fullscreenchange", function(event) {
+   if (document.fullscreenElement !== null) {
+      screen.orientation.lock("landscape").catch (() => {});
+      let resize = function () {
+         if (screen.width > screen.height) {
+            resize_canvas(screen.width, screen.height, true);
+         }
+         else {
+            resize_canvas(screen.height, screen.width, true);
+         }
+      }
+      resize ();
+      window.setTimeout (resize, 100);
+   }
+   else {
+      set_canvas_size();
+   }
+});
+document.addEventListener("webkitfullscreenchange", function(event) {
+
+   if (document.webkitFullscreenElement !== null) {
+      screen.orientation.lock("landscape").catch (() => {});
+      if (screen.width > screen.height) {
+         resize_canvas(screen.width, screen.height, true);
+      }
+      else {
+         resize_canvas(screen.height, screen.width, true);
+      }
+   }
+   else {
+      set_canvas_size();
+   }
+});
+document.addEventListener("mozfullscreenchange", function(event) {
+
+   if (document.mozFullScreenElement !== null) {
+      screen.orientation.lock("landscape").catch (() => {});
+      if (screen.width > screen.height) {
+         resize_canvas(screen.width, screen.height, true);
+      }
+      else {
+         resize_canvas(screen.height, screen.width, true);
+      }
+   }
+   else {
+      set_canvas_size();
+   }
+});
+document.addEventListener("msfullscreenchange", function(event) {
+   if (document.msFullscreenElement !== null) {
+      screen.orientation.lock("landscape").catch (() => {});
+      if (screen.width > screen.height) {
+         resize_canvas(screen.width, screen.height, true);
+      }
+      else {
+         resize_canvas(screen.height, screen.width, true);
+      }
+   }
+   else {
+      set_canvas_size();
+   }
+});
+
+function resize_canvas(width, height, fullscreen) {
+   let canvas = document.getElementById ("canvas_plane");
+   canvas.style.width = width+"px";
+   canvas.width = width;
+   canvas.style.height = height+"px";
+   canvas.height = height;
+   let divPlane = document.getElementById ("div_plane");
+   divPlane.style.width = width+"px";
+   divPlane.style.height = height+"px";
+
+   let divMenuBar = document.getElementById ("div_menu_bar");
+   divMenuBar.style.transform = "scale("+((0.9*width-100)/750)+")";
+   divMenuBar.style.transformOrigin = "0 0";
+
+   let transform = "scale("+(0.75*width)/(0.75*1440)+") translateX(-50%) translateY(-50%)";
+
+   let settingsMenu = document.getElementById ("div_settings_menu");
+   settingsMenu.style.transform = transform;
+   settingsMenu.style.transformOrigin = "0 0";
+
+   let pauseDialog = document.getElementById ("div_pause_dialog");
+   pauseDialog.style.transform = transform;
+   pauseDialog.style.transformOrigin = "0 0";
+
+   let messageDialog = document.getElementById ("div_message_dialog");
+   messageDialog.style.transform = transform;
+   messageDialog.style.transformOrigin = "0 0";
+
+   let rankingDialog = document.getElementById ("div_ranking_dialog");
+   rankingDialog.style.transform = transform;
+   rankingDialog.style.transformOrigin = "0 0";
+
+   let usernameRecordDialog = document.getElementById ("div_username_record_dialog");
+    usernameRecordDialog.style.transform = transform;
+   usernameRecordDialog.style.transformOrigin = "0 0";
+
+   camera.aspect = width/height;
+   cameraAspect = width/height;
+   camera.updateProjectionMatrix();
+
+   renderer.setPixelRatio (window.devicePixelRatio);
+   renderer.setSize(width, height);
+}
+
+function set_canvas_size() {
+   if (window.innerWidth > window.innerHeight) {
+      var width = 0.75*window.innerWidth;
+   }
+   else {
+      var width = Math.min (0.75*window.innerWidth, window.innerHeight*16/9);
+   }
+   resize_canvas(width, 9/16*width, false);
+}
+
+window.moduleInit = moduleInitAmmo
+window.animate = animate;
+</script>
+
+<script>
+
+var camera;
+var cameraAspect;
+var soundGeneratorAudioListener = null;
+var volume = 1.0;
+var renderer;
+var scene;
+var stats;
+var raycaster;
+var mouse_vector;
+var canvas;
+var current_scene;
+var font;
+var divThrottle;
+var cameraPositionSpans;
+var spanScore;
+var meterFuel;
+var rankingDialog;
+var usernameRecordDialog;
+
+var frameInterval = 1000/30;
+
+var flaps_direction_down = false;
+var throttleFps = false;
+var game1_simulationType = "particle_system";
+var game1_renderForests = false;
+var paused = false;
+var dialogShown = false;
+var animationFrameRequested = false;
+
+function setCurrentScene (scene) {
+   if (current_scene && current_scene.close) {
+      current_scene.close ();
+   }
+   div_menu_bar.style.display = "none";
+//div_menu_bar.style.display = "block";
+   div_throttle.style.display = "none";
+   current_scene = scene;
+}
+
+function showMenuBar (show) {
+   if (show) {
+      div_menu_bar.style.display = "block";
+   }
+   else {
+      div_menu_bar.style.display = "none";
+   }
+}
+
+function selectCameraPositionSpan (cameraPosition, cameraPositionRightEnabled = true) {
+   if (cameraPositionRightEnabled) {
+      if (cameraPosition === "cockpit") {
+         cameraPositionSpans[1].innerHTML = "Cockpit";
+         cameraPositionSpans[2].innerHTML = "Right";
+         cameraPositionSpans[3].innerHTML = "Behind";
+      }
+      else if (cameraPosition === "right") {
+         cameraPositionSpans[1].innerHTML = "Right";
+         cameraPositionSpans[2].innerHTML = "Behind";
+         cameraPositionSpans[3].innerHTML = "Cockpit";
+      }
+      else if (cameraPosition === "behind") {
+         cameraPositionSpans[1].innerHTML = "Behind";
+         cameraPositionSpans[2].innerHTML = "Cockpit";
+         cameraPositionSpans[3].innerHTML = "Right";
+      }
+      else {
+         throw new Error ("Not supported camera position: "+cameraPosition);
+      }
+   }
+   else {
+      if (cameraPosition === "cockpit") {
+         cameraPositionSpans[1].innerHTML = "Cockpit";
+         cameraPositionSpans[2].innerHTML = "Behind";
+         cameraPositionSpans[3].innerHTML = "";
+      }
+      else if (cameraPosition === "behind") {
+         cameraPositionSpans[1].innerHTML = "Behind";
+         cameraPositionSpans[2].innerHTML = "Cockpit";
+         cameraPositionSpans[3].innerHTML = "";
+      }
+      else {
+         throw new Error ("Not supported camera position: "+cameraPosition);
+      }
+   }
+}
+
+function setScore (score) {
+   spanScore.innerHTML = score;
+}
+
+function setFuelPercentage (percentage) {
+   meter_fuel.value = percentage;
+}
+
+function showDivThrottle (show) {
+   if (show) {
+      div_throttle.style.display = "block";
+   }
+   else {
+      div_throttle.style.display = "none";
+   }
+}
+
+var divThrottleMouseDown = false;
+function divThrottleOnMouseDown (event) {
+   divThrottleMouseDown = true;
+   onMouseMove (event);
+}
+
+function activate_fullscreen () {
+
+   var object = document.getElementById("div_plane");
+
+   if (object.requestFullscreen) {
+     object.requestFullscreen();
+   } else if (object.msRequestFullscreen) {
+     object.msRequestFullscreen();
+   } else if (object.mozRequestFullScreen) {
+     object.mozRequestFullScreen();
+   } else if (object.webkitRequestFullscreen) {
+     object.webkitRequestFullscreen();
+   }
+}
+
+function onMouseUp (event) {
+   if (divThrottleMouseDown) {
+      divThrottleMouseDown = false;
+      canvas_plane.focus ();
+   }
+}
+
+function onMouseLeave (event) {
+   if (event.clientX <= 0 || event.clientY <= 0 ||
+       event.clientX >= window.innerWidth ||
+       event.clientY >= window.innerHeight) {
+      divThrottleMouseDown = false;
+   }
+}
+
+function onMouseMove (event) {
+   if (divThrottleMouseDown) {
+      current_scene.onMouseMoveThrottleSlider (event.pageY-divThrottle.offsetTop,
+                                               divThrottle.clientHeight);
+      return;
+   }
+}
+
+function updateVolume () {
+   volume = 0.01*event.target.value;
+   soundGeneratorAudioListener.setMasterVolume (volume);
+}
+
+function canvasKeyDown(event) {
+
+   if (current_scene) {
+
+      if (event.key == "p") {
+         pause ();
+         return;
+      }
+
+      if (current_scene.keyDown) {
+         current_scene.keyDown (event);
+      }
+   }
+}
+
+function canvasKeyUp(event) {
+
+   if (event.type != "keyup") {
+      return;
+   }
+
+   if (current_scene && current_scene.keyUp) {
+      current_scene.keyUp (event);
+   }
+}
+
+function canvasClick (event) {
+   if (current_scene != undefined) {
+      current_scene.click (event);
+   }
+}
+
+function canvasMouseMove (event) {
+   if (current_scene && current_scene.mouseMove) {
+      var rect = canvas.getBoundingClientRect ();
+      let width = rect.right-rect.left;
+      let height = rect.bottom-rect.top;
+      current_scene.mouseMove (event.pageX-rect.left,
+                               event.pageY-rect.top,
+                               width, height);
+   }
+}
+
+function canvasMouseDown (event) {
+   if (current_scene) {
+      if (!current_scene.mouseDown) {
+         console.log ("mouseDown not defined");
+         return;
+      }
+      current_scene.mouseDown (event);
+   }
+}
+
+function canvasMouseUp (event) {
+   if (current_scene) {
+      if (!current_scene.mouseUp) {
+         console.log ("mouseUp not defined");
+         return;
+      }
+      current_scene.mouseUp (event);
+   }
+}
+
+function cameraButtonOnclick () {
+   canvas_plane.focus ();
+   if (current_scene) {
+      current_scene.cameraButtonOnclick ();
+   }
+}
+
+function rocketButtonOnclick () {
+   canvas_plane.focus ();
+   if (current_scene && current_scene.rocketButtonOnclick) {
+      current_scene.rocketButtonOnclick ();
+   }
+}
+
+function setRocketButtonVisible (visible) {
+   var rocketButton = document.getElementById ("rocket_button");
+   if (visible) {
+      rocketButton.style.display = "inline-block";
+   }
+   else {
+      rocketButton.style.display = "none";
+   }
+}
+
+function resume (event) {
+   if (soundGeneratorAudioListener && !dialogShown) {
+      soundGeneratorAudioListener.setMasterVolume (volume);
+   }
+
+   if (!paused || dialogShown) {
+      return;
+   }
+   paused = false;
+
+   if (animationFrameRequested) {
+      return;
+   }
+
+   if (current_scene && current_scene.resumeAnimation) {
+      current_scene.resumeAnimation();
+   }
+   window.animate();
+}
+
+function pause (event) {
+   soundGeneratorAudioListener.setMasterVolume (0);
+   let divPlane = document.getElementById ("div_plane");
+   if (paused || event && divPlane.contains(event.relatedTarget) ||
+       current_scene && current_scene.disablePause) {
+      return;
+   }
+
+   if (current_scene && current_scene.showPauseDialog &&
+       current_scene.showPauseDialog ()) {
+      window.showPauseDialog ();
+   }
+   paused = true;
+}
+
+function rankingDialogClose () {
+   rankingDialog.close();
+}
+
+function init () {
+   window.moduleInit ();
+}
+
+</script>
+
+</head>
+<body onload="init ()">
+<div id="div_plane_centering">
+   <div id="div_plane">
+      <canvas id="canvas_plane" tabindex="1"></canvas>
+      <div id="div_menu_bar">
+         <div id="div_camera">
+            <button id="camera_button" onclick="cameraButtonOnclick()"></button>
+            <div id="div_camera_position">
+               <span id="span_camera_position_title"><b>Camera Position</b></span>
+               <span id="span_camera_position_selected">Cockpit</span>
+               <span>Right</span>
+               <span>Behind</span>
+            </div>
+         </div>
+         <div style="display: inline-block;">
+            <div>
+               <button id="rocket_button" onclick="rocketButtonOnclick()"></button>
+            </div>
+            <div>
+               Score: <span id="span_score"></span>
+            </div>
+            <div>
+               <label for="meter_fuel">Fuel: </label><meter id="meter_fuel" value="10" min="0" low="10" max="100"></meter>
+            </div>
+         </div>
+      </div>
+      <div id="div_throttle" tabindex="-1"></div>
+      <canvas id="canvas_height_map" height="256" width="256"></canvas>
+      <div id="div_loading_screen">
+         <div id="div_loading_screen_progress_bar">
+            Loading...
+         </div>
+      </div>
+      <div id="div_message_dialog_with_background">
+         <div id="div_message_dialog">
+               <div id="div_message_dialog_title">Title</div>
+               <div id="div_message_dialog_content">
+                  Text
+               </div>
+            <div id="div_message_dialog_buttons">
+               <button id="button_message_dialog_left" onclick="messageDialogButtonLeftOnclick()">Button left</button>
+               <button id="button_message_dialog_right" onclick="messageDialogButtonRightOnclick()">Button right</button>
+            </div>
+         </div>
+      </div>
+      <div id="div_pause_dialog_with_background">
+         <div id="div_pause_dialog">
+            <div id="div_pause_dialog_title">Pause</div>
+            <div id="div_pause_dialog_buttons">
+               <button class="button_pause_dialog" id="button_pause_dialog_menu" onclick="window.pauseDialogMainMenu()">main menu</button>
+               <button class="button_pause_dialog" id="button_pause_dialog_resume" onclick="window.pauseDialogResume()">resume</button>
+            </div>
+         </div>
+      </div>
+      <div id="div_settings_menu">
+         <div id="div_settings_menu_title">Menu</div>
+         <div id="div_settings_menu_content">
+            <table>
+               <tr>
+                  <td>Throttle FPS:</td>
+                  <td>
+                     <label for="input_throttle_fps">30 FPS</label><input type="radio" name="throttle_fps" onchange="setThrottleFps (this)" id="input_throttle_30fps" value="30fps">
+                     <label for="input_throttle_fps">off</label><input type="radio" name="throttle_fps" onchange="setThrottleFps (this)" id="input_throttle_fps_off" value="off" checked="checked">
+                  </td>
+               </tr>
+               <tr>
+                  <td>Game "Flight Over the Mountains" forests:</td>
+                  <td>
+                     <label for="input_forests_activated">activated</label><input type="radio" name="flight_over_the_mountains_render_forests" onchange="setRenderForests (true)" id="input_forests_activated" value="activated">
+                     <label for="input_forests_deactivated">deactivated</label><input type="radio" name="flight_over_the_mountains_render_forests" onchange="setRenderForests (false)" id="input_forests_deactivated" value="deactivated" checked="checked">
+                  </td>
+               </tr>
+               <tr>
+                  <td><label for="input_volume" id="label_volume">Volume</label> <input type="range" id="input_volume" name="input_volume" min="0" max="100" value="100"></td>
+               </tr>
+            </table>
+         </div>
+         <div id="div_settings_menu_buttons">
+            <button id="button_settings_menu_close" onclick="settingsMenuClose()">close</button>
+         </div>
+      </div>
+      <div id="div_ranking_dialog">
+         <div id="div_ranking_dialog_title">Ranking</div>
+         <div id="div_inputs_ranking_dialog_tabs">
+            <input type="radio" name="ranking_dialog_tab" id="input_ranking_dialog_tabs_current" value="current_ranking"></input><label id="label_ranking_dialog_tabs_current" for="input_ranking_dialog_tabs_current">current ranking</label>
+            <input type="radio" name="ranking_dialog_tab" id="input_ranking_dialog_tabs_current_checkpoints" value="checkpoints_timing"></input><label id="label_ranking_dialog_tabs_current_checkpoints" for="input_ranking_dialog_tabs_current_checkpoints">checkpoints timing</label>
+            <input type="radio" name="ranking_dialog_tab" id="input_ranking_dialog_tabs_checkpoints" value="checkpoints_ranking"></input><label id="label_ranking_dialog_tabs_checkpoints" for="input_ranking_dialog_tabs_checkpoints">checkpoints records</label>
+            <input type="radio" name="ranking_dialog_tab" id="input_ranking_dialog_tabs_today" value="ranking_today"></input><label for="input_ranking_dialog_tabs_today">today</label>
+            <input type="radio" name="ranking_dialog_tab" id="input_ranking_dialog_tabs_all" value="ranking_all"></input><label for="input_ranking_dialog_tabs_all">all</label>
+         </div>
+         <div id="div_ranking_dialog_content">
+            <table class="table_ranking" id="table_current_ranking">
+            </table>
+            <table class="table_ranking" id="table_checkpoints_timing">
+            </table>
+            <table class="table_ranking" id="table_checkpoints_ranking">
+            </table>
+            <table class="table_ranking" id="table_ranking_today">
+            </table>
+            <table class="table_ranking" id="table_ranking_all">
+            </table>
+         </div>
+         <div id="div_ranking_dialog_buttons">
+            <button class="button_ranking_dialog" id="button_ranking_dialog_close" onclick="rankingDialogClose()">close</button>
+         </div>
+      </div>
+      <div id="div_username_record_dialog_with_background">
+         <div id="div_username_record_dialog">
+               <div id="div_username_record_dialog_title">New Record</div>
+               <div id="div_username_record_dialog_content">
+                  <span style="margin-right: 75px;">Congrats! Please enter an username for the scoreboard:</span><input id="input_username_record" type="text"></input>
+               </div>
+            <div id="div_username_record_dialog_buttons">
+               <button id="div_username_record_dialog_ok">ok</button>
+               <button id="div_username_record_dialog_cancel">cancel</button>
+            </div>
+         </div>
+      </div>
+   </div>
+</div>
+<input type="button" onclick="activate_fullscreen()" value="full screen"></input></br>
+<span id="span_wings"></span>
+<span id="span_thrust"></span>
+<span id="span_velocity"></span>
+</div>
+</body>
+</html>
