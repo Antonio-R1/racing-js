@@ -31,6 +31,7 @@ This game is not finished and will be added later.
 - Arrow up: accelerate
 - Arrow down: brake
 - Arrows left and right: steering
+- C: change camera
 - E: exit
 - S: reset position
 
@@ -39,6 +40,7 @@ This game is not finished and will be added later.
 - Mouse left and right: ailerons
 - Arrows left and right: rudder, steering
 - +, -: increase, deacrease throttle
+- C: change camera
 - E: exit
 - S: reset position
 
