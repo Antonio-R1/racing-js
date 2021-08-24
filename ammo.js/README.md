@@ -1,0 +1,1 @@
+This folder contains a custom version of ammo.js based on bullet3 and with increased total memory -DTOTAL_MEMORY.

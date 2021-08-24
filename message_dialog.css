@@ -1,0 +1,44 @@
+
+#div_message_dialog {
+   top: 50%;
+   left: 50%;
+   position: absolute;
+   width: 1235px;
+   background: rgba(0,0,255,0.85);
+   border: solid white;
+   border-radius: 25px;
+   user-select: none;
+}
+
+#div_message_dialog_with_background {
+   top: 0px;
+   left: 0px;
+   height: 100%;
+   width: 100%;
+   z-index: 256;
+   position: absolute;
+   background: rgba(75,75,75,0.5);
+   display: none;
+}
+
+#div_message_dialog_title {
+   padding: 10px;
+   font-size: xx-large;
+   border-top-left-radius: 25px;
+   border-top-right-radius: 25px;
+   border-bottom: solid black;
+   background: rgba(75,75,75,0.85);
+}
+
+#div_message_dialog_content {
+   padding: 10px;
+}
+
+#div_message_dialog_buttons {
+   width: calc(100% - 20px);
+   text-align: right;
+   padding: 10px;
+   position: relative;
+   border-bottom-left-radius: 25px;
+   border-bottom-right-radius: 25px;
+}
