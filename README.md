@@ -1,11 +1,11 @@
-# racing-js
+# Racing JS
 a 3D browser game
 
 ## Games
 
 ### Flight Over the Mountains
 ![Game Flight Over the Mountains](img/game_flight_over_the_mountains.jpg)
-- Press the space bar for tilting the elevator up, release the space bar for tiling the elevator down.
+- Press the space bar for tilting the elevator up, release the space bar for tilting the elevator down.
 - Press R for using the rockets for boosting the speed.
 
 ### Island
@@ -33,6 +33,7 @@ This game is not finished and will be added later.
 - Arrows left and right: steering
 - C: change camera
 - E: exit
+- R: reverse gear
 - S: reset position
 
 ### Airplane
