@@ -140,7 +140,7 @@ class Menu {
             this.plane_object.planeRotationPosition.rotation.y -= Math.PI/4;
          }
          else if (object == this.text_help) {
-            window.open("/help.htm", '_blank').focus();
+            window.open("help.htm", '_blank').focus();
          }
       }
    }
