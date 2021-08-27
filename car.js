@@ -80,7 +80,7 @@ class Car extends Vehicle {
       else if (loadingManager) {
          var gltfLoader = new GLTFLoader(loadingManager);
 
-         gltfLoader.load("car.gltf", function(gltf) {
+         gltfLoader.load("gltf/car.gltf", function(gltf) {
             Car.gltfCar = gltf;
          },
          function (xhr) {
@@ -98,7 +98,7 @@ class Car extends Vehicle {
       var width = 2.05;
       var height = 1.275;
       var length = 3.85;
-      this.mass = 800*0+1000;
+      this.mass = 1000;
       this.wheelRadius = 0.375;
       this.wheelRevsPerSecond = [0, 0, 0, 0];
       var wheelWidth = 0.15;

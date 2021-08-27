@@ -14,7 +14,7 @@ class Island {
 
       var gltfLoader = new GLTFLoader(loadingManager);
 
-      gltfLoader.load("island.glb", function(gltf) {
+      gltfLoader.load("gltf/island.glb", function(gltf) {
          Island.gltf_island = gltf;
 
          island_object.clone ();

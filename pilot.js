@@ -61,7 +61,7 @@ class Pilot extends THREE.Object3D {
 
       var gltfLoader = new GLTFLoader(loadingManager);
 
-      gltfLoader.load("pilot.gltf", function(gltf) {
+      gltfLoader.load("gltf/pilot.gltf", function(gltf) {
          pilot_object.gltf = gltf;
          if (pilot_object.game) {
             pilot_object.addCharacterController ();

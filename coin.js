@@ -14,7 +14,7 @@ class Coin {
 
       var gltfLoader = new GLTFLoader(loadingManager);
 
-      gltfLoader.load("coin.gltf", function(gltf) {
+      gltfLoader.load("gltf/coin.gltf", function(gltf) {
          Coin.gltf_coin = gltf;
 
          coin_object.clone ();

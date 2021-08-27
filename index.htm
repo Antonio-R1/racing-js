@@ -9,10 +9,10 @@
 <title>Racing JS</title>
 
 <link rel="stylesheet" href="settings_menu/settings_menu.css">
-<link rel="stylesheet" href="pause_dialog.css">
-<link rel="stylesheet" href="message_dialog.css">
-<link rel="stylesheet" href="ranking_dialog.css">
-<link rel="stylesheet" href="username_dialog.css">
+<link rel="stylesheet" href="css/pause_dialog.css">
+<link rel="stylesheet" href="css/message_dialog.css">
+<link rel="stylesheet" href="css/ranking_dialog.css">
+<link rel="stylesheet" href="css/username_dialog.css">
 
 <style type="text/css">
 
@@ -159,7 +159,6 @@ import {Menu} from './menu.js';
 import './pause_dialog.js';
 import Plane from './plane.js';
 import FlightInstruments from './flight_instruments.js';
-import Airport from './airport.js';
 import Runway from './runway.js';
 import Barrel from './barrel.js';
 import Coin from './coin.js';
@@ -260,7 +259,6 @@ function moduleInit () {
    var plane = new Plane ({loadingManager: loadingManager});
    var runway = new Runway (loadingManager);
    var flightInstruments = new FlightInstruments (loadingManager);
-   var airport = new Airport (loadingManager);
    var pilot = new Pilot({loadingManager: loadingManager});
    var car = new Car({loadingManager: loadingManager});
    var barrel = new Barrel (loadingManager);

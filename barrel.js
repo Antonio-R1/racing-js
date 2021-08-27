@@ -14,7 +14,7 @@ class Barrel {
 
       var gltfLoader = new GLTFLoader(loadingManager);
 
-      gltfLoader.load("barrel.gltf", function(gltf) {
+      gltfLoader.load("gltf/barrel.gltf", function(gltf) {
          Barrel.gltf_barrel = gltf;
 
          barrel_object.clone ();
