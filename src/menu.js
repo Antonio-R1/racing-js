@@ -238,7 +238,7 @@ class Menu {
       let plane = this.plane_object.plane_scene;
       plane.rotation.y = -1/2*Math.PI;
       this.plane_object.setActive(true, false);
-      this.plane_object.throttle = 1;
+      this.plane_object.throttle = 1.0;
       plane.position.set (75, 20, -20);
       scene.add (plane);
 
@@ -247,6 +247,7 @@ class Menu {
 
    resumeAnimation () {
       this.animate_time = window.performance.now ();
+      this.plane_object.resumeAnimation (this.animate_time);
    }
 
    animate () {
