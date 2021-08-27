@@ -13,7 +13,7 @@ class FlightInstruments {
 
       var gltfLoader = new GLTFLoader(loadingManager);
 
-      gltfLoader.load("flight_instruments.gltf", function(gltf) {
+      gltfLoader.load("gltf/flight_instruments.gltf", function(gltf) {
          FlightInstruments.gltf_flightInstruments = gltf;
          flightInstruments_object.clone ();
          flightInstruments_object.animate_time = null;

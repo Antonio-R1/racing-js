@@ -17,7 +17,7 @@ class Menu {
          return;
       }
 
-      gltfLoader.load("play_button.gltf", function(gltf) {
+      gltfLoader.load("gltf/play_button.gltf", function(gltf) {
          Menu.gltf_play_button = gltf;
          menu_object.clone ();         
       }, 

@@ -192,7 +192,7 @@ class Plane extends Vehicle {
 
       var gltfLoader = new GLTFLoader(loadingManager);
 
-      gltfLoader.load("plane.gltf", function(gltf) {
+      gltfLoader.load("gltf/plane.gltf", function(gltf) {
          Plane.gltf_plane = gltf;
          plane_object.clone ();
          plane_object.animate_time = null;

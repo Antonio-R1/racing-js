@@ -10,7 +10,6 @@ import {BoundingBox,
         CollisionDetectionSphere} from './collision_detection.js';
 import Plane from './plane.js';
 import FlightInstruments from './flight_instruments.js';
-import Airport from './airport.js';
 import Runway from './runway.js';
 import Barrel from './barrel.js';
 import Coin from './coin.js';
@@ -1005,14 +1004,14 @@ class GameFlightOverTheMountains extends Game {
          game1.planeObject.plane_scene.position.set (0, terrain.runway_altitude+0.01+game1.planeObject.centerOfMass.y, game1.planeObject.centerOfMass.z);
          scene.add (game1.runway.runway_scene);
 
-         let airport = new Airport().object3d;
-         airport.scale.x = 0.45;
-         airport.scale.y = 0.45;
-         airport.scale.z = 0.45;
-         airport.position.x = -7;
-         airport.position.y = terrain.runway_altitude+0.1;
-         airport.position.z = 495;
-         airport.rotation.y = Math.PI;
+//         let airport = new Airport().object3d;
+//         airport.scale.x = 0.45;
+//         airport.scale.y = 0.45;
+//         airport.scale.z = 0.45;
+//         airport.position.x = -7;
+//         airport.position.y = terrain.runway_altitude+0.1;
+//         airport.position.z = 495;
+//         airport.rotation.y = Math.PI;
 //         scene.add (airport);
 
          game1.ground = terrain.ground;

@@ -14,7 +14,7 @@ class Rocket {
 
       var gltfLoader = new GLTFLoader(loadingManager);
 
-      gltfLoader.load("rocket.gltf", function(gltf) {
+      gltfLoader.load("gltf/rocket.gltf", function(gltf) {
          Rocket.gltf_rocket = gltf;
 
          rocket_object.clone ();
