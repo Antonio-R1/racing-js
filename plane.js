@@ -198,7 +198,7 @@ class Plane extends Vehicle {
          plane_object.animate_time = null;
       }, 
       function (xhr) {
-         console.log("object: "+(xhr.loaded/xhr.total*100)+'% loaded');
+//         console.log("object: "+(xhr.loaded/xhr.total*100)+'% loaded');
       },
       function (error) {
          console.error(error);
@@ -239,7 +239,7 @@ class Plane extends Vehicle {
       }
 
       obj.traverse (function (object) {
-         console.log (object.name);
+//         console.log (object.name);
 
          if (object instanceof THREE.Mesh) {
             object.castShadow = true;

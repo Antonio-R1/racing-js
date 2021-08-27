@@ -84,7 +84,7 @@ class Car extends Vehicle {
             Car.gltfCar = gltf;
          },
          function (xhr) {
-            console.log("object: "+( xhr.loaded / xhr.total * 100 ) + '% loaded' );
+//            console.log("object: "+( xhr.loaded / xhr.total * 100 ) + '% loaded' );
          },
          function (error) {
             console.error (error);
@@ -187,7 +187,7 @@ class Car extends Vehicle {
       this.boundingBoxes = [];
 
       obj.traverse (function (object) {
-         console.log (object.name);
+//         console.log (object.name);
          if (object.material) {
             if (object.material.name === "car_material") {
                if (!carObject.carMaterial) {

@@ -22,7 +22,7 @@ class Menu {
          menu_object.clone ();         
       }, 
       function (xhr) {
-         console.log("object: "+( xhr.loaded / xhr.total * 100 ) + '% loaded' );
+//         console.log("object: "+( xhr.loaded / xhr.total * 100 ) + '% loaded' );
       },
       function (error) {
          console.error(error);
@@ -39,7 +39,7 @@ class Menu {
       this.play_button_scene.position.z = 0;
 
       this.play_button_scene.traverse (function (object) {
-         console.log (object.name);
+//         console.log (object.name);
          switch (object.name) {
             case "play_button":
                menu_object.play_button = object;
