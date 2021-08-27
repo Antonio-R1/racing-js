@@ -192,11 +192,11 @@ function moduleInit () {
 
    var loadingManager = new THREE.LoadingManager();
    loadingManager.onStart = function (url, itemsLoaded, itemsTotal) {
-      console.log( 'Started loading file\nLoaded ' + itemsLoaded + ' of ' + itemsTotal + ' files.' );
+//      console.log( 'Started loading file\nLoaded ' + itemsLoaded + ' of ' + itemsTotal + ' files.' );
    };
 
    loadingManager.onProgress = function (url, itemsLoaded, itemsTotal) {
-      console.log( 'Loading file\nLoaded ' + itemsLoaded + ' of ' + itemsTotal + ' files.' );
+//      console.log( 'Loading file\nLoaded ' + itemsLoaded + ' of ' + itemsTotal + ' files.' );
       progressBar.innerHTML = "Loading... (file "+itemsLoaded+" of "+itemsTotal+" files)";
       progressBar.style.background = "linear-gradient(90deg, green, green "+(itemsLoaded/itemsTotal*100)+"%, white "+((itemsLoaded+10)/itemsTotal*100)+"%)";
    };

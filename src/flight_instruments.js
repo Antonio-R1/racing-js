@@ -19,7 +19,7 @@ class FlightInstruments {
          flightInstruments_object.animate_time = null;
       }, 
       function (xhr) {
-         console.log("object: "+( xhr.loaded / xhr.total * 100 ) + '% loaded' );
+//         console.log("object: "+( xhr.loaded / xhr.total * 100 ) + '% loaded' );
       },
       function (error) {
          console.error (error);
@@ -31,7 +31,7 @@ class FlightInstruments {
       let flightInstruments_object = this;
 
       obj.traverse (function (object) {
-         console.log (object.name);
+//         console.log (object.name);
          switch (object.name) {
             case "airspeed_indicator_pointer":
                flightInstruments_object.airspeed_indicator_pointer = object;

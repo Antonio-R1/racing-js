@@ -20,7 +20,7 @@ class Coin {
          coin_object.clone ();
       },
       function (xhr) {
-         console.log("object: "+( xhr.loaded / xhr.total * 100 ) + '% loaded' );
+//         console.log("object: "+( xhr.loaded / xhr.total * 100 ) + '% loaded' );
       },
       function (error) {
          console.log(error);

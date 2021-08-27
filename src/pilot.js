@@ -81,7 +81,7 @@ class Pilot extends THREE.Object3D {
          pilot_object.setAnimation ("standing", false);
       }, 
       function (xhr) {
-         console.log("object: "+( xhr.loaded / xhr.total * 100 ) + '% loaded' );
+//         console.log("object: "+( xhr.loaded / xhr.total * 100 ) + '% loaded' );
       },
       function (error) {
          console.error (error);
