@@ -513,11 +513,11 @@ class Pilot extends THREE.Object3D {
       let time = window.performance.now ();
       this.updateKeyboardMappingPanel (time);
 
-      let speed = 0.5;
-      let angularSpeed = 10;
+      let speed = 5.0;
+      let angularSpeed = 100;
       if (this.arrowUp) {
          var elements = this.matrixWorld.elements;
-         speed = speed*interval;
+         speed = speed*fixedTimeStep;
          this.btVectorWalkDirection.setValue (speed*elements[8], speed*elements[9], speed*elements[10]);
       }
       else {
@@ -530,10 +530,10 @@ class Pilot extends THREE.Object3D {
          this.btVectorAngularVelocity.setValue(0, 0, 0);
       }
       else if (this.arrowLeft) {
-         this.btVectorAngularVelocity.setValue(0, angularSpeed*interval, 0);
+         this.btVectorAngularVelocity.setValue(0, angularSpeed*fixedTimeStep, 0);
       }
       else if (this.arrowRight) {
-         this.btVectorAngularVelocity.setValue(0, -angularSpeed*interval, 0);
+         this.btVectorAngularVelocity.setValue(0, -angularSpeed*fixedTimeStep, 0);
       }
       this.characterController.setAngularVelocity (this.btVectorAngularVelocity);
       Camera.updateCameraBehindObject(this.game.physicsWorld, this, this.camera);
