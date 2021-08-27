@@ -79,6 +79,8 @@ class Plane extends Vehicle {
       this.airplane_mass = 4500;
       this.mass = 2750;
       this.speed = 0.0;
+      this.altitude = 0.0
+      this.atmosphericDensity = 1.225;
       this.total_lift = 0.0;
       this.planeRotationPosition = new THREE.Object3D ();
       this.lastPosition = new THREE.Vector3 ();
@@ -1032,27 +1034,29 @@ class Plane extends Vehicle {
    }
 
    _getWingsLift3d (velocity, angleOfAttack) {
-      return velocity.lengthSq()*this._getLiftCoefficient(angleOfAttack)*0.5*35;
+      return velocity.lengthSq()*this._getLiftCoefficient(angleOfAttack)*0.5*this.getAtmosphericDensity ()*29.0;
    }
 
    _getWingsDrag3d (velocity, angleOfAttack) {
-      return velocity.lengthSq()*this._getDragCoefficient(angleOfAttack)*0.5*35;
+      return velocity.lengthSq()*this._getDragCoefficient(angleOfAttack)*0.5*this.getAtmosphericDensity ()*29.0;
    }
 
    _getHorizontalStabilizerLift3d (velocity, angleOfAttack) {
-      return velocity.lengthSq()*this._getLiftCoefficient(angleOfAttack)*5;
+      return velocity.lengthSq()*this._getLiftCoefficient(angleOfAttack)*4.0*this.getAtmosphericDensity ();
    }
 
    _getHorizontalStabilizerDrag3d (velocity, angleOfAttack) {
-      return velocity.lengthSq()*this._getDragCoefficient(angleOfAttack)*5;
+      return velocity.lengthSq()*this._getDragCoefficient(angleOfAttack)*4.0*this.getAtmosphericDensity ();
    }
 
    _getWingsLift (angleOfAttackWings) {
-      return this.particleSystem.velocity.lengthSq()*this._getLiftCoefficient(angleOfAttackWings)*75;
+      return this.particleSystem.velocity.lengthSq()*this._getLiftCoefficient(angleOfAttackWings)*61.0*
+             this.getAtmosphericDensity ();
    }
 
    _getWingsDrag (angleOfAttackWings) {
-      return this.particleSystem.velocity.lengthSq()*this._getDragCoefficient(angleOfAttackWings)*75;
+      return this.particleSystem.velocity.lengthSq()*this._getDragCoefficient(angleOfAttackWings)*61.0*
+             this.getAtmosphericDensity ();
    }
 
    _getHorizontalStabilizerLift (angleOfAttackHorizontalStabilizer) {
@@ -1063,7 +1067,7 @@ class Plane extends Vehicle {
       while (angleOfAttack<0) {
          angleOfAttack+= 2*Math.PI;
       }
-      return this.particleSystem.velocity.lengthSq()*this._getLiftCoefficient(angleOfAttack);
+      return this.particleSystem.velocity.lengthSq()*this._getLiftCoefficient(angleOfAttack)*0.8*this.getAtmosphericDensity ();
    }
 
    _getHorizontalStabilizerDrag (angleOfAttackHorizontalStabilizer) {
@@ -1074,7 +1078,7 @@ class Plane extends Vehicle {
       while (angleOfAttack<0) {
          angleOfAttack+= 2*Math.PI;
       }
-      return this.particleSystem.velocity.lengthSq()*this._getDragCoefficient(angleOfAttack);
+      return this.particleSystem.velocity.lengthSq()*this._getDragCoefficient(angleOfAttack)*0.8*this.getAtmosphericDensity ();
    }
 
    _getNormalForce (lift, drag, angleOfAttack) {
@@ -1394,11 +1398,6 @@ class Plane extends Vehicle {
       return true;
    }
 
-   get_lift_or_drag (air_density, speed, wing_area, lift_or_drag_coefficient) {
-      return 1/2*air_density*speed*speed*wing_area*lift_or_drag_coefficient;
-   }
-
-
    getMotorFuelConsumptionPercentagePerSecond3d () {
       var rightMotorConsumption = this.propeller_right_speed/(2*Math.PI)*60/this.motorMaxKWRpm;
       var leftMotorConsumption = this.propeller_left_speed/(2*Math.PI)*60/this.motorMaxKWRpm;
@@ -1451,9 +1450,26 @@ class Plane extends Vehicle {
       return torque;
    }
 
+   /*
+    * computes the atmospperic density depending on the current altitude
+    * https://en.wikipedia.org/wiki/Barometric_formula
+    */
    getAtmosphericDensity () {
       let altitude = this.plane_scene.position.y;
-      return 1.2250;
+      if (Math.abs(this.altitude-altitude)<0.5) {
+         return this.atmosphericDensity;
+      }
+
+      let densitySeaLevel = 1.225;
+      let standardTemperature = 288.15;
+      let temperatureLapseRate = -0.0065;
+      let universalGasConstant = 8.3144598;
+      let g = 9.81;
+      let airMolarMass = 0.0289644;
+      this.altitude = altitude;
+      this.atmosphericDensity = 1.225;
+      return densitySeaLevel*Math.pow((standardTemperature+temperatureLapseRate*altitude)/standardTemperature,
+                -g*airMolarMass/(universalGasConstant*temperatureLapseRate));
    }
 
    /*
@@ -1862,7 +1878,7 @@ class Plane extends Vehicle {
             this.setRockets(false);
          }
          else {
-            rocketsForce = 175000;
+            rocketsForce = 50000;
          }
       }
       this.particleMotor.force.set(0, 0, this.get_propeller_force()+rocketsForce-drag)

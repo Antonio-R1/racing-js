@@ -12,7 +12,7 @@ a 3D browser game
 ![Game Island](img/game_island.gif)
 - See the controls for walking and the vehicles below.
 - Try to pass through as many spheres as possible before the fuel of the airplane finishes.
-- The blues spheres fill up the fuel of the airplane.
+- The blue spheres fill up the fuel of the airplane.
 
 ### Race (Multiplayer)
 This game is not finished and will be added later.
@@ -20,6 +20,7 @@ This game is not finished and will be added later.
 ![Game Race](img/game_race.jpg)
 
 ## Controls
+The game can be paused by pressing P.
 
 ### Pilot
 - Arrow up: walk
@@ -33,6 +34,7 @@ This game is not finished and will be added later.
 - Arrows left and right: steering
 - C: change camera
 - E: exit
+- L: toggle the lights
 - R: reverse gear
 - S: reset position
 
