@@ -18,8 +18,8 @@ class Engine {
       }
 
       if (xAxisPowerValues===null) {
-         xAxisPowerValues = [0,  1000,   2000,    3500,   7500,    8750,  10000];
-         yAxisPowerValues = [0, 2*73500/7500*1000,  2*73500/7500*2000, 2*73500/7500*3500, 2*73500,  2*73500/7500*8750, 2*73500/7500*8750];
+         xAxisPowerValues = [0,  1000,  2000,  3500,   4500,   7500,    8750,  10000];
+         yAxisPowerValues = [0, 15000, 40000, 80000, 110000, 147000, 125000,   75000];
       }
 
       this.powerValues = new SplineInterpolation (xAxisPowerValues, yAxisPowerValues);
