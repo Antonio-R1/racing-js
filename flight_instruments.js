@@ -101,14 +101,14 @@ class FlightInstruments {
       this.airspeed_indicator_pointer.rotation.y = 1/2*Math.PI-((speed-30)/180*2*Math.PI);
       let altitude = position_y*1.68781;
       let altitude_pointer_rotation = -2*Math.PI*altitude;
-      this.altimeter_pointer1.rotation.z = altitude_pointer_rotation/1000;
-      this.altimeter_pointer2.rotation.z = altitude_pointer_rotation/10000;
-      this.altimeter_pointer3.rotation.z = altitude_pointer_rotation/100000;
+      this.altimeter_pointer1.rotation.z = 0.001*altitude_pointer_rotation;
+      this.altimeter_pointer2.rotation.z = 0.0001*altitude_pointer_rotation;
+      this.altimeter_pointer3.rotation.z = 0.00001*altitude_pointer_rotation;
 
       this.compass_dial.rotation.z = -heading;
 
-      let altitude_difference = (altitude-this.last_altitude)/(interval/1000);
-      let altitude_difference_feet_per_minute = altitude_difference*60/100;
+      let altitude_difference = (altitude-this.last_altitude)/(0.001*interval);
+      let altitude_difference_feet_per_minute = 0.01*altitude_difference*60;
       if (altitude_difference_feet_per_minute > 20) {
          altitude_difference_feet_per_minute = 20;
       }
