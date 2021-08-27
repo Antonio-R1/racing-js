@@ -390,7 +390,7 @@ class Plane extends Vehicle {
       }
 
       this.plane_scene.add(this.plane);
-      this.animate_time = null;
+      this.animateTime = null;
       addCollisionDetectionSphere (0.0, 1.0,  2.0, 1.0);
       addCollisionDetectionSphere (0.0, 1.0,  0.0, 1.0);
       addCollisionDetectionSphere (0.0, 2.5, -5.0, 1.0);
@@ -1964,11 +1964,61 @@ class Plane extends Vehicle {
    }
 
    resumeAnimation (time) {
-      this.last_frame = time;
       this.lastFrame = time;
    }
 
    animate (time, animate_time, interval) {
+      if (this.animateTime == null) {
+         this.animateTime = time;
+         this.lastFrame = time;
+         this.lastPosition.copy (this.plane_scene.position);
+         this.lastRotation.copy (this.plane_scene.rotation);
+         this.planeRotationPosition.position.copy (this.plane_scene.position);
+         this.planeRotationPosition.rotation.copy (this.plane_scene.rotation);
+         this.plane_scene.updateMatrixWorld ();
+         for (var i=0; i<this.boundingBoxes.length; i++) {
+            this.boundingBoxes[i].applyMatrix4 (this.planeRotationPosition);
+         }
+         for (var i=0; i<this.collisionDetectionSpheres.length; i++) {
+            this.collisionDetectionSpheres[i].updatePosition ();
+         }
+         return;
+      }
+
+      this.updateLights (time);
+
+      var updatesPerSeconds = 30.0;
+      var updateInterval = 1000.0/updatesPerSeconds;
+
+      this.updateThrottle (interval);
+
+      var lastFrameInterval = time-this.lastFrame;
+      if (lastFrameInterval < updateInterval) {
+         return;
+      }
+
+      var frames = Math.floor (lastFrameInterval/updateInterval);
+      for (var i=0; i<frames; i++) {
+         this.updatePlaneValues (updatesPerSeconds);
+      }
+      this.plane_scene.position.copy (this.planeRotationPosition.position);
+      this.plane_scene.rotation.copy (this.planeRotationPosition.rotation);
+
+      if (this.consumesFuel) {
+         this.updateFuelLevel (frames*updateInterval);
+      }
+
+      if (this.cockpit != null) {
+         let attitude = this._getAttitude();
+         this.cockpit.update (frames*updateInterval,
+                              this.metersPerSecondToKnots(this.plane_scene.position.y),
+                              attitude.pitch, attitude.heading, attitude.roll,
+                              this.throttle,
+                              this.metersPerSecondToKnots(this.speed));
+      }
+
+      this.lastFrame += frames*updateInterval;
+      this.animateTime = time;
    }
 }
 
