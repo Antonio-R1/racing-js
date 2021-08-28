@@ -1,3 +1,8 @@
+/*
+ * Copyright (c) 2021 Antonio-R1
+ * License: https://github.com/Antonio-R1/racing-js/LICENSE | GNU AGPLv3
+ */
+
 import * as THREE from './three_js/build/three.module.js';
 import {GLTFLoader} from './three_js/examples/jsm/loaders/GLTFLoader.js';
 import {EngineSoundGenerator} from './sound/sound_generator_worklet.js';

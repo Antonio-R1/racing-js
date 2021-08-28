@@ -1,3 +1,7 @@
+/*
+ * Copyright (c) 2021 Antonio-R1
+ * License: https://github.com/Antonio-R1/racing-js/LICENSE | GNU AGPLv3
+ */
 
 function showSettingsMenu () {
    var divSettingsMenu = document.getElementById("div_settings_menu");
