@@ -575,6 +575,8 @@ class Plane extends Vehicle {
                                                     this.position.z));
       this._addRigidBodyFromBoundingBox (this.body);
       this._addRigidBodyFromBoundingBox (this.wings);
+      this._addRigidBodyFromBoundingBox (this.motor_right);
+      this._addRigidBodyFromBoundingBox (this.motor_left);
       this._addRigidBodyFromBoundingBox (this.horizontalStabilizer);
       this._createRigidBody ();
       this._createRaycastVehicle ();
