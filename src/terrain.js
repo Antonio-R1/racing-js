@@ -1,3 +1,8 @@
+/*
+ * Copyright (c) 2021 Antonio-R1
+ * License: https://github.com/Antonio-R1/racing-js/LICENSE | GNU AGPLv3
+ */
+
 import * as THREE from './three_js/build/three.module.js';
 import ConvolutionWebAssembly from './convolution/convolution.js';
 import {Array2d, Convolution} from './convolution.js';

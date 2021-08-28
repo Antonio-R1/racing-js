@@ -1,3 +1,8 @@
+/*
+ * Copyright (c) 2021 Antonio-R1
+ * License: https://github.com/Antonio-R1/racing-js/LICENSE | GNU AGPLv3
+ */
+
 import {convolution_web_assembly, convolution_module_web_assembly_initialized} from './convolution_web_assembly.js';
 
 class ConvolutionWebAssembly {
