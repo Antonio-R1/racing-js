@@ -1,9 +1,10 @@
 /*
- * Copyright (c) 2021 Antonio-R1
- * License: https://github.com/Antonio-R1/racing-js/LICENSE | GNU AGPLv3
+ * Copyright (c) 2021-2022 Antonio-R1
+ * License: https://github.com/Antonio-R1/racing-js/blob/main/LICENSE | GNU AGPLv3
  */
 
 import * as THREE from './three_js/build/three.module.js';
+import {DRACOLoader} from './three_js/examples/jsm/loaders/DRACOLoader.js';
 import {GLTFLoader} from './three_js/examples/jsm/loaders/GLTFLoader.js';
 
 class Island {
@@ -18,6 +19,9 @@ class Island {
       }
 
       var gltfLoader = new GLTFLoader(loadingManager);
+      const dracoLoader = new DRACOLoader();
+      dracoLoader.setDecoderPath('./three_js/examples/js/libs/draco/');
+      gltfLoader.setDRACOLoader(dracoLoader);
 
       gltfLoader.load("gltf/island.glb", function(gltf) {
          Island.gltf_island = gltf;

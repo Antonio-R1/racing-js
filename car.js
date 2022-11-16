@@ -4,6 +4,7 @@
  */
 
 import * as THREE from './three_js/build/three.module.js';
+import {DRACOLoader} from './three_js/examples/jsm/loaders/DRACOLoader.js';
 import {GLTFLoader} from './three_js/examples/jsm/loaders/GLTFLoader.js';
 import {EngineSoundGenerator} from './sound/sound_generator_worklet_wasm.js';
 import Engine from './engine.js';
@@ -84,6 +85,9 @@ class Car extends Vehicle {
       }
       else if (loadingManager) {
          var gltfLoader = new GLTFLoader(loadingManager);
+         const dracoLoader = new DRACOLoader();
+         dracoLoader.setDecoderPath( './three_js/examples/js/libs/draco/' );
+         gltfLoader.setDRACOLoader( dracoLoader );
 
          gltfLoader.load("gltf/car.gltf", function(gltf) {
             Car.gltfCar = gltf;
