@@ -1,6 +1,6 @@
 /*
- * Copyright (c) 2021 Antonio-R1
- * License: https://github.com/Antonio-R1/racing-js/LICENSE | GNU AGPLv3
+ * Copyright (c) 2021-2022 Antonio-R1
+ * License: https://github.com/Antonio-R1/racing-js/blob/main/LICENSE | GNU AGPLv3
  */
 
 class Matrix2d {
