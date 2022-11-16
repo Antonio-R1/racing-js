@@ -1,11 +1,11 @@
 /*
- * Copyright (c) 2021 Antonio-R1
- * License: https://github.com/Antonio-R1/racing-js/LICENSE | GNU AGPLv3
+ * Copyright (c) 2021-2022 Antonio-R1
+ * License: https://github.com/Antonio-R1/racing-js/blob/main/LICENSE | GNU AGPLv3
  */
 
 import * as THREE from './three_js/build/three.module.js';
 import {GLTFLoader} from './three_js/examples/jsm/loaders/GLTFLoader.js';
-import {EngineSoundGenerator} from './sound/sound_generator_worklet.js';
+import {EngineSoundGenerator} from './sound/sound_generator_worklet_wasm.js';
 import Engine from './engine.js';
 import Vehicle from './vehicle.js';
 
@@ -509,7 +509,7 @@ class Car extends Vehicle {
       else {
                this.gainIntake.value = 0.1;
                this.gainEngineBlockVibrations.value = 1.0;
-               this.gainOutlet.value = 1.0;
+               this.gainOutlet.value = 0.05;
       }
    }
 
@@ -620,6 +620,7 @@ class Car extends Vehicle {
       this.rigidBody.setWorldTransform (transform);
       this.game.physicsWorld.addRigidBody (this.rigidBody, DefaultFilter | RigidBodyFilter, AllFilter);
       this.game.physicsWorld.addAction (this.raycastVehicle);
+      this.engineSoundGenerator.reset();
    }
 
    /*
