@@ -1,12 +1,13 @@
 /*
- * Copyright (c) 2021 Antonio-R1
- * License: https://github.com/Antonio-R1/racing-js/LICENSE | GNU AGPLv3
+ * Copyright (c) 2021-2022 Antonio-R1
+ * License: https://github.com/Antonio-R1/racing-js/blob/main/LICENSE | GNU AGPLv3
  */
 
 import * as THREE from './three_js/build/three.module.js';
 import {GLTFLoader} from './three_js/examples/jsm/loaders/GLTFLoader.js';
 //import {SoundGeneratorAudioListener} from './sound/sound_generator_worklet.js';
 import Plane from './plane.js';
+import SkySphere from './sky.js';
 import GameFlightOverTheMountains from './game_mountains.js';
 import GameIsland from './game_island.js';
 
@@ -196,26 +197,34 @@ class Menu {
 
       scene = new THREE.Scene();
       camera.remove (soundGeneratorAudioListener);
-      camera = new THREE.PerspectiveCamera(75, cameraAspect, 0.1, 1000);
+      let cameraFar = 1000;
+      camera = new THREE.PerspectiveCamera(75, cameraAspect, 0.1, cameraFar);
       camera.add (soundGeneratorAudioListener);
       camera.position.x = 0;
       camera.position.y = 5;
       camera.position.z = 15;
 
-      let ambientLight = new THREE.AmbientLight(0xffffff, 0.5);
-      scene.add(ambientLight);
-
-      let directionalLight = new THREE.DirectionalLight(0xffffff, 2);
-      directionalLight.position.x = 100;
-      directionalLight.position.y = 200;
-      directionalLight.position.z = 100;
-      scene.add(directionalLight);
-
       let ground_geometry = new THREE.PlaneBufferGeometry (1000, 1000);
-      let ground_material = new THREE.MeshPhongMaterial ({color: 0x004500, specular: 0x004500});
+      let ground_material = new THREE.MeshPhongMaterial ({color: 0x007520, specular: 0x007520});
       let ground = new THREE.Mesh (ground_geometry, ground_material);
       ground.rotation.x = -1/2*Math.PI;
       scene.add (ground);
+
+      let planeHasSpotLight = false;
+      var skySphere = new SkySphere (cameraFar);
+      let sunPositionX = 5000;
+      let sunPositionY = 2500;
+      let sunPositionZ = 3500;
+      if (Math.random()<0.5) {
+         sunPositionX = -5000;
+         sunPositionY = 125;
+         sunPositionZ = 2500;
+         skySphere.ambientLight.intensity += 1;
+         planeHasSpotLight = true;
+      }
+      skySphere.setSunPosition (sunPositionX, sunPositionY, sunPositionZ);
+      scene.add (skySphere);
+      camera.getWorldPosition(skySphere.position);
 
       scene.add (this.play_button_scene);
 
@@ -239,12 +248,15 @@ class Menu {
       text_help.scale.set (0.025, 0.025, 0.0025);
       scene.add (text_help);
 
-      this.plane_object = new Plane ({lift_and_gravity_deactivated: true});
+      this.plane_object = new Plane ({lift_and_gravity_deactivated: true, hasSpotLight: planeHasSpotLight});
+      this.plane_object.cameraIndex = 1;
+      this.plane_object.updateGainValues ();
       let plane = this.plane_object.plane_scene;
       plane.rotation.y = -1/2*Math.PI;
       this.plane_object.setActive(true, false);
       this.plane_object.throttle = 1.0;
-      plane.position.set (75, 20, -20);
+      this.planeMaxDistanceX = 175;
+      plane.position.set (this.planeMaxDistanceX, 20, -20);
       scene.add (plane);
 
       setCurrentScene (this);
@@ -260,13 +272,13 @@ class Menu {
 
       var planeRotationPosition = this.plane_object.planeRotationPosition;
 
-      if (planeRotationPosition.position.x <= -75) {
-         planeRotationPosition.position.x = 75;
+      if (planeRotationPosition.position.x < -this.planeMaxDistanceX) {
+         planeRotationPosition.position.x = this.planeMaxDistanceX;
       }
-      else if (planeRotationPosition.position.x > 75) {
-         planeRotationPosition.position.x = -75;
+      else if (planeRotationPosition.position.x > this.planeMaxDistanceX) {
+         planeRotationPosition.position.x = -this.planeMaxDistanceX;
       }
-      else if (planeRotationPosition.position.z <= -200) {
+      if (planeRotationPosition.position.z < -200) {
          planeRotationPosition.position.z = 0;
       }
       else if (planeRotationPosition.position.z > 0) {
