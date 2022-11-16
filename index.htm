@@ -299,6 +299,8 @@ function moduleInit () {
 
    cameraPositionSpans = document.getElementById ("div_camera_position").getElementsByTagName ("span");
 
+   window.onresize = function () {set_canvas_size()};
+
    animate ();
 }
 
