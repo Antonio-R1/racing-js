@@ -44,6 +44,18 @@
    position: relative;
 }
 
+#div_status_bar {
+   bottom: 0px;
+   left: 0px;
+   right: 0px;
+   padding: 5px;
+   position: absolute;
+   pointer-events: none;
+   font-size: 24px;
+   background: rgba(75, 75, 75, 0.5);
+   display: none;
+}
+
 #div_loading_screen {
    top: 0px;
    left: 0px;
@@ -474,6 +486,7 @@ function setCurrentScene (scene) {
    div_menu_bar.style.display = "none";
 //div_menu_bar.style.display = "block";
    div_throttle.style.display = "none";
+   setStatusBar(false);
    current_scene = scene;
 }
 
@@ -545,6 +558,17 @@ var divThrottleMouseDown = false;
 function divThrottleOnMouseDown (event) {
    divThrottleMouseDown = true;
    onMouseMove (event);
+}
+
+function setStatusBar (visible, text="") {
+   let statusBar = document.getElementById("div_status_bar");
+   if (visible) {
+      statusBar.style.display = "block";
+   }
+   else {
+      statusBar.style.display = "none";
+   }
+   statusBar.innerHTML = text;
 }
 
 function activate_fullscreen () {
@@ -841,6 +865,10 @@ function init () {
             </div>
          </div>
       </div>
+
+   <div id="div_status_bar">
+      &uarr;&nbsp;accelerate | &darr;&nbsp;brake | &larr;&nbsp;&rarr;&nbsp;steering | R&nbsp;reverse&nbsp;gear | SPACE&nbsp;jump | S&nbsp;reset&nbsp;position | C&nbsp;change&nbsp;camera
+   </div>
    </div>
 </div>
 <input type="button" onclick="activate_fullscreen()" value="full screen"></input></br>

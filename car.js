@@ -19,7 +19,9 @@ var RigidBodyFilter = 64;
 
 class Car extends Vehicle {
 
-   constructor ({game, x, y, z, rotationX = 0, rotationY = 0, rotationZ = 0, loadingManager, setCameraCallback, hasSpotLights = false, vehicleName = "car", color}) {
+   constructor ({game, x, y, z, rotationX = 0, rotationY = 0, rotationZ = 0, loadingManager, setCameraCallback, hasSpotLights = false, vehicleName = "car",
+                 suspensionRestLength = 1.25, suspensionStiffness = 100, suspensionDamping = 1000, suspensionCompression = 100, rollInfluence = 0.01, friction = 100, color,
+                 statusBarText}) {
       super ();
       this.vehicleName = vehicleName;
       this.color = color;
@@ -47,6 +49,13 @@ class Car extends Vehicle {
       this.areBrakingLightsOn = false;
       this.isReverseGearLightOn = false;
       this.cameras = [];
+      this.suspensionRestLength = suspensionRestLength;
+      this.suspensionStiffness = suspensionStiffness;
+      this.suspensionDamping = suspensionDamping;
+      this.suspensionCompression = suspensionCompression;
+      this.rollInfluence = rollInfluence;
+      this.friction = friction;
+      this.statusBarText = statusBarText;
 
       let carObject = this;
 
@@ -104,9 +113,10 @@ class Car extends Vehicle {
          throw new Error ("A THREE.LoadingManager needs to be passed as argument to load the object.");
       }
 
-      var width = 2.05;
-      var height = 1.275;
-      var length = 3.85;
+      let boundingBox = this.boundingBoxes[0].geometry.boundingBox;
+      var width = boundingBox.max.x-boundingBox.min.x;
+      var height = boundingBox.max.y-boundingBox.min.y;
+      var length = boundingBox.max.z-boundingBox.min.z;
       this.mass = 1000;
       this.wheelRadius = 0.375;
       this.wheelRevsPerSecond = [0, 0, 0, 0];
@@ -124,15 +134,30 @@ class Car extends Vehicle {
       this.position.set (x, y, z);
       this.rotation.set (rotationX, rotationY, rotationZ);
 
-      var geometry = new Ammo.btBoxShape (new Ammo.btVector3(0.5*width, 0.5*height, 0.5*length));
-
       var compoundShape = new Ammo.btCompoundShape();
-      let transform = new Ammo.btTransform ();
-      transform.setIdentity ();
-      transform.setOrigin (new Ammo.btVector3 (0, 1.25, 0));
-      compoundShape.addChildShape(transform, geometry);
+      let addBoxShape = function (geometry, x, y, z) {
+         let offset = 1.25;
+         let transform = new Ammo.btTransform ();
+         transform.setIdentity ();
+         transform.setOrigin (new Ammo.btVector3 (x, offset+y, z));
+         compoundShape.addChildShape(transform, geometry);
+      }
 
-      transform = new Ammo.btTransform ();
+      var geometry1 = new Ammo.btBoxShape (new Ammo.btVector3(0.5*width, 0.01, 0.5*length));
+      var geometry2 = new Ammo.btBoxShape (new Ammo.btVector3(0.25*width, 0.01, 0.5*length));
+      var geometry3 = new Ammo.btBoxShape (new Ammo.btVector3(0.01, 0.5*height-0.01, 0.5*length-0.01));
+      var geometry4 = new Ammo.btBoxShape (new Ammo.btVector3(0.01, 0.5*height-0.01, 0.5*length-0.01));
+      var geometry5 = new Ammo.btBoxShape (new Ammo.btVector3(0.5*width-0.01, 0.5*height-0.01, 0.01));
+      var geometry6 = new Ammo.btBoxShape (new Ammo.btVector3(0.5*width-0.01, 0.5*height-0.01, 0.01));
+
+      addBoxShape(geometry1, 0.0,  0.5*height, 0.0);
+      addBoxShape(geometry2, 0.0, -0.5*height, 0.0)
+      addBoxShape(geometry3, -0.5*width,  0.0, 0.0);
+      addBoxShape(geometry4,  0.5*width,  0.0, 0.0);
+      addBoxShape(geometry5,  0.0,  0.0, -0.5*length);
+      addBoxShape(geometry6,  0.0,  0.0,  0.5*length);
+
+      let transform = new Ammo.btTransform ();
       transform.setIdentity ();
       transform.setOrigin (new Ammo.btVector3 (x, y, z));
       transform.setRotation (new Ammo.btQuaternion (this.quaternion.x,
@@ -369,6 +394,9 @@ class Car extends Vehicle {
             this.updateCameraBehindVehicle = true;
             this.cameraIndex = 0;
             this.setCameraCallback ();
+            if (this.statusBarText) {
+               setStatusBar (true, this.statusBarText);
+            }
          }
 
          let gainNode = this.engineSoundGenerator.gain;
@@ -574,11 +602,10 @@ class Car extends Vehicle {
       var connectionPointCS0 = new Ammo.btVector3 (x, y, z);
       var wheelDirectionCS0 = new Ammo.btVector3 (0, -1, 0);
       var wheelAxleCS = new Ammo.btVector3 (-1, 0, 0);
-      var suspensionRestLength = 1.25;
       var wheelInfo = vehicle.addWheel (connectionPointCS0,
                                         wheelDirectionCS0,
                                         wheelAxleCS,
-                                        suspensionRestLength,
+                                        this.suspensionRestLength,
                                         radius,
                                         tuning,
                                         isFrontWheel);
@@ -592,19 +619,13 @@ class Car extends Vehicle {
          wheel.position.z = z;
       }
 
-      let suspensionStiffness = 100;
-      let suspensionDamping = 1000;
-      let suspensionCompression = 100;
-      let rollInfluence = 0.01;
-      let friction = 100;
-
       wheelInfo.set_m_maxSuspensionForce(this.mass*9.81);
       wheelInfo.set_m_maxSuspensionTravelCm(75);
-      wheelInfo.set_m_suspensionStiffness(suspensionStiffness);
-      wheelInfo.set_m_wheelsDampingCompression(suspensionCompression);
-      wheelInfo.set_m_wheelsDampingRelaxation(suspensionDamping);
-      wheelInfo.set_m_frictionSlip(friction);
-      wheelInfo.set_m_rollInfluence(rollInfluence);
+      wheelInfo.set_m_suspensionStiffness(this.suspensionStiffness);
+      wheelInfo.set_m_wheelsDampingCompression(this.suspensionCompression);
+      wheelInfo.set_m_wheelsDampingRelaxation(this.suspensionDamping);
+      wheelInfo.set_m_frictionSlip(this.friction);
+      wheelInfo.set_m_rollInfluence(this.rollInfluence);
 
       this.wheels.push (wheel);
       scene.add (wheel);
@@ -650,7 +671,6 @@ class Car extends Vehicle {
                    .add (velocity);
       localVelocity.copy (velocity);
       let length = velocity.length ();
-      this.updateMatrixWorld();
       localVelocity.transformDirection (this._matrix4d.copy(this.matrixWorld).invert());
       localVelocity.multiplyScalar (length);
       return localVelocity;
