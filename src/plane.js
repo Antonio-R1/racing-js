@@ -1,11 +1,11 @@
 /*
- * Copyright (c) 2021 Antonio-R1
- * License: https://github.com/Antonio-R1/racing-js/LICENSE | GNU AGPLv3
+ * Copyright (c) 2021-2022 Antonio-R1
+ * License: https://github.com/Antonio-R1/racing-js/blob/main/LICENSE | GNU AGPLv3
  */
 
 import * as THREE from './three_js/build/three.module.js';
 import {GLTFLoader} from './three_js/examples/jsm/loaders/GLTFLoader.js';
-import {EngineSoundGenerator} from './sound/sound_generator_worklet.js';
+import {EngineSoundGenerator} from './sound/sound_generator_worklet_wasm.js';
 import Vehicle from './vehicle.js';
 import FlightInstruments from './flight_instruments.js';
 import {BoundingBox,
@@ -158,25 +158,25 @@ class Plane extends Vehicle {
 
                            exhaustOpenReflectionFactor: 0.25,
                            exhaustClosedReflectionFactor: 0.95,
-                           ignitionTime: 0.025,
+                           ignitionTime: 0.35,
 
                            straightPipeWaveguideLength: 5,
                            straightPipeReflectionFactor: 0.01,
 
                            mufflerElementsLength: [10, 15, 20, 25],
-                           action: 0.1,
+                           action: 0.05,
 
                            outletWaveguideLength: 5,
                            outletReflectionFactor: 0.01};
 
-         this.engineLeftSoundGenerator = new EngineSoundGenerator({listener: soundGeneratorAudioListener, parameters: parameters});
+         this.engineLeftSoundGenerator = new EngineSoundGenerator({listener: soundGeneratorAudioListener, parameters: parameters, clamp: clampEngineSound});
          this.motor_left.add (this.engineLeftSoundGenerator);
          this.gainIntakeLeft = this.engineLeftSoundGenerator.gainIntake.gain;
          this.gainEngineBlockVibrationsLeft = this.engineLeftSoundGenerator.gainEngineBlockVibrations.gain;
          this.gainOutletLeft = this.engineLeftSoundGenerator.gainOutlet.gain;
          this.rpmParamLeft = this.engineLeftSoundGenerator.worklet.parameters.get('rpm');
 
-         this.engineRightSoundGenerator = new EngineSoundGenerator({listener: soundGeneratorAudioListener, parameters: parameters});
+         this.engineRightSoundGenerator = new EngineSoundGenerator({listener: soundGeneratorAudioListener, parameters: parameters, clamp: clampEngineSound});
          this.motor_right.add (this.engineRightSoundGenerator);
          this.gainIntakeRight = this.engineRightSoundGenerator.gainIntake.gain;
          this.gainEngineBlockVibrationsRight = this.engineRightSoundGenerator.gainEngineBlockVibrations.gain;
@@ -771,6 +771,8 @@ class Plane extends Vehicle {
       this.rigidBody.setWorldTransform (transform);
       this.game.physicsWorld.addRigidBody (this.rigidBody, DefaultFilter | RigidBodyFilter, AllFilter);
       this.game.physicsWorld.addAction (this.raycastVehicle);
+      this.engineLeftSoundGenerator.reset();
+      this.engineRightSoundGenerator.reset();
    }
 
    handleWheelTouchObject (type) {
@@ -1231,11 +1233,11 @@ class Plane extends Vehicle {
       if (this.cameraIndex === 0) {
                this.gainIntakeLeft.value = 0.1;
                this.gainEngineBlockVibrationsLeft.value = 1.0;
-               this.gainOutletLeft.value = 1.0;
+               this.gainOutletLeft.value = 0.05;
 
                this.gainIntakeRight.value = 0.1;
                this.gainEngineBlockVibrationsRight.value = 1.0;
-               this.gainOutletRight.value = 1.0;
+               this.gainOutletRight.value = 0.05;
       }
       else {
                this.gainIntakeLeft.value = 0.1;
