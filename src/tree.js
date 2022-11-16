@@ -27,7 +27,6 @@ class Trees extends THREE.InstancedMesh {
       this._matrixTemplate = new THREE.Matrix4 ();
 
       this.frustumCulled = true;
-      var boundingSpherePosition = boundingSpherePosition;
       this.geometry.boundingSphere = new THREE.Sphere (boundingSpherePosition, boundingSphereRadius);
 
       for (var i=0; i<this.count; i++) {
