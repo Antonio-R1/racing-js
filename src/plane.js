@@ -34,9 +34,11 @@ class Plane extends Vehicle {
 
    constructor ({loadingManager, lift_and_gravity_deactivated, hasSpotLight = false, consumesFuel = false,
                  globallyUsedVariables, game, use3dPhysics = false, position, rotation,
-                 setCameraCallback, vehicleName = "airplane", deactivateDepthWrite}) {
+                 setCameraCallback, vehicleName = "airplane", deactivateDepthWrite, clampEngineSound = false,
+                 statusBarText}) {
       super ();
       this.vehicleName = vehicleName;
+      this.statusBarText = statusBarText;
       this.deactivateDepthWrite = deactivateDepthWrite;
       let plane_object = this;
       this.updateCameraBehindVehicle = true;
@@ -363,7 +365,7 @@ class Plane extends Vehicle {
          var lightsSize = size/Math.tan ((Math.PI/180)*camera.fov/2);
          let alphaMap = new THREE.TextureLoader().load("images/light_glow_alpha_map.png");
          var pointsMaterial = new THREE.PointsMaterial ({alphaMap: alphaMap,
-                                                         color: color, size: lightsSize, depthWrite: !deactivateDepthWrite, transparent: true});
+                                                         color: color, size: lightsSize, depthWrite: false, transparent: true});
 
          var lights = new THREE.Points (pointsGeometry, pointsMaterial);
          object3d.add (lights);
@@ -630,6 +632,9 @@ class Plane extends Vehicle {
             showMenuBar (true);
             selectCameraPositionSpan ("cockpit", false);
             showDivThrottle (true);
+            if (this.statusBarText) {
+               setStatusBar (true, this.statusBarText);
+            }
          }
 
          let gainNode = this.engineLeftSoundGenerator.gain;
@@ -860,7 +865,7 @@ class Plane extends Vehicle {
 
       this.updateThrottle (1000*interval);
       if (this.consumesFuel) {
-         this.updateFuelLevel3d (interval);
+         this.updateFuelLevel3d (fixedTimeStep*steps);
       }
 
       if (this.arrowLeft) {
@@ -1686,7 +1691,7 @@ class Plane extends Vehicle {
       return -speed_z*speed_z*drag_z_axis_coefficient;
    }
 
-   getLiftInducedDrag () {
+   getInducedDrag () {
       return this.total_lift*0;
    }
 
@@ -1751,7 +1756,7 @@ class Plane extends Vehicle {
       if (airplane_acceleration > 0) {
          this.speed += airplane_acceleration;
       }
-      this.speed -= interval/1000*(this.getDragZAxis (this.velocity.z)+this.getLiftInducedDrag ())/this.airplane_mass;
+      this.speed -= interval/1000*(this.getDragZAxis (this.velocity.z)+this.getInducedDrag ())/this.airplane_mass;
       this.velocity.x = this.velocity.x/2;
       this.velocity.y = 0.95*this.velocity.y;
       this.velocity.z = this.speed;

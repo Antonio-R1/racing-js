@@ -389,6 +389,7 @@ class GameIsland extends Game {
       if (pilot.vehicle) {
          if (event.key === "e") {
             pilot.exitVehicle ();
+            setStatusBar (true, this.pilotStatusBarText);
             return;
          }
          pilot.vehicle.keyUp (event);
@@ -420,6 +421,8 @@ class GameIsland extends Game {
       showMenuBar (false);
       showDivThrottle (false);
       setScore (this.score);
+      this.pilotStatusBarText = "&uarr;&nbsp;walk | &larr;&nbsp;&rarr;&nbsp;turn&nbsp;left&nbsp;or&nbsp;right | SPACE&nbsp;jump | P&nbsp;pause";
+      setStatusBar (true, this.pilotStatusBarText);
       scene = new THREE.Scene();
       scene.fog = new THREE.Fog (0x7575ff, 2000, this.cameraFar);
 
@@ -496,15 +499,18 @@ class GameIsland extends Game {
          gameIsland.setCamera (camera);
       }
 
+      let carStatusBarText = "&uarr;&nbsp;accelerate | &darr;&nbsp;brake | &larr;&nbsp;&rarr;&nbsp;steering | R&nbsp;reverse&nbsp;gear | S&nbsp;reset&nbsp;position | C&nbsp;change&nbsp;camera | L&nbsp;toggle&nbsp;lights | P&nbsp;pause";
       let car = new Car ({game: this, x: 0, y: 11, z: -25, hasSpotLights: true,
-                          setCameraCallback: setCameraCallback});
+                          setCameraCallback: setCameraCallback, statusBarText: carStatusBarText});
       this.car = car;
 //      this.currentVehicle = car;
       scene.add (car);
 
+      let planeStatusBarText = " +&nbsp;-&nbsp;throttle | B&nbsp;brake | &larr;&nbsp;&rarr;&nbsp;steering wheel, rudder | mouse&nbsp;&darr;&nbsp;&uarr;&nbsp;elevator | mouse&nbsp;&larr;&nbsp;&rarr;&nbsp;ailerons | S&nbsp;reset&nbsp;position | C&nbsp;change&nbsp;camera | P&nbsp;pause";
       let plane = new Plane ({game: this, use3dPhysics: true, position: new THREE.Vector3 (85, 10, -100),
                               rotation: new THREE.Euler (0, 0.7*Math.PI, 0),
-                              setCameraCallback: setCameraCallback, hasSpotLight: true, consumesFuel: true});
+                              setCameraCallback: setCameraCallback, hasSpotLight: true, consumesFuel: true,
+                              statusBarText: planeStatusBarText});
       this.plane = plane;
       this.plane.setLinkedListCollisionSpheres (this.linkedListCollisionSpheres);
       scene.add (plane);
