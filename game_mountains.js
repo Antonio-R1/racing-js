@@ -280,6 +280,8 @@ class GameFlightOverTheMountains extends Game {
 
    cameraButtonOnclick () {
       if (this.cameraPosition === "cockpit") {
+         this.planeObject.cameraIndex = 1;
+         this.planeObject.updateGainValues();
          camera.rotation.y = -Math.PI/2;
          this.cameraAnimateFunction = this.updateSideCameraPosition;
          this.add_animate_function (this.updateSideCameraPosition);
@@ -290,6 +292,8 @@ class GameFlightOverTheMountains extends Game {
          return;
       }
       else if (this.cameraPosition === "right") {
+         this.planeObject.cameraIndex = 2;
+         this.planeObject.updateGainValues();
          camera.rotation.y = Math.PI;
          this.remove_animate_function (this.updateSideCameraPosition);
          this.cameraAnimateFunction = this.updateFollowUpCameraPosition;
@@ -300,6 +304,8 @@ class GameFlightOverTheMountains extends Game {
          selectCameraPositionSpan (this.cameraPosition);
          return;
       }
+      this.planeObject.cameraIndex = 0;
+      this.planeObject.updateGainValues();
       this.remove_animate_function (this.updateFollowUpCameraPosition);
       this.cameraAnimateFunction = null;
       camera.rotation.y = Math.PI;
@@ -895,8 +901,12 @@ class GameFlightOverTheMountains extends Game {
       scene = new THREE.Scene();
       scene.fog = new THREE.Fog (0x7575ff, 2000, this.cameraFar);
 
-      this.planeObject = new Plane ({lift_and_gravity_deactivated: false, hasSpotLight: true, consumesFuel: true, deactivateDepthWrite: true});
+      this.planeObject = new Plane ({lift_and_gravity_deactivated: false, hasSpotLight: true, consumesFuel: true, deactivateDepthWrite: true, clampEngineSound: true});
+      this.planeObject.engineLeftSoundGenerator.updateMatrixWorld = this.planeObject.engineLeftSoundGenerator._updateMatrixWorld;
+      this.planeObject.engineRightSoundGenerator.updateMatrixWorld = this.planeObject.engineRightSoundGenerator._updateMatrixWorld;
       this.planeObject.setActive(true, false);
+      this.planeObject.cameraIndex = 0;
+      this.planeObject.updateGainValues();
       let plane = this.planeObject.plane;
 
       camera.remove (soundGeneratorAudioListener);
