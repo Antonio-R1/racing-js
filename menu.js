@@ -68,6 +68,10 @@ class Menu {
       window.alert ("Not implemented.");
    }
 
+   show_not_supported_browser_error () {
+      window.alert ("Your browser is not supported.");
+   }
+
    menu_select_game_entry_click_callback (object, callback, start_time, time, interval) {
       let current_interval = time-start_time;
       object.rotation.x = -current_interval/250*2*Math.PI;
@@ -78,6 +82,18 @@ class Menu {
          this.plane_object.setActive(false, false);
          callback ();
       }
+   }
+
+   testWebWorkerModuleImport () {
+      this.webWorkerModuleImportNotSupported = false;
+      let menuObject = this;
+      window.onerror = function (e) {
+         if (e.includes("import declarations may only appear at top level of a module")) {
+            menuObject.webWorkerModuleImportNotSupported = true;
+         }
+      }
+      let webWorker = new Worker ("terrain_web_worker.js", {type: "module"});
+      window.setTimeout (() => {webWorker.terminate}, 1000);
    }
 
    click (event) {
@@ -96,6 +112,8 @@ class Menu {
 
          if (object == this.play_button_scene && this.menu_button_click_callback == null) {
             console.log ("play_button");
+
+            this.testWebWorkerModuleImport ()
 
             soundGeneratorAudioListener.context.resume ();
 
@@ -118,6 +136,10 @@ class Menu {
                   this.addSelectGameMenuEntry ("Flight Over the Mountains", 0.01, function (object) {
                      let start_time = window.performance.now ();
                      menu_object.menu_button_click_callback = function (time, interval) {
+                        if (menu_object.webWorkerModuleImportNotSupported) {
+                           menu_object.menu_select_game_entry_click_callback (object, this.show_not_supported_browser_error, start_time, time, interval);
+                           return;
+                        }
                         menu_object.menu_select_game_entry_click_callback (object, this.start_game1, start_time, time, interval);
                      };
                   });
