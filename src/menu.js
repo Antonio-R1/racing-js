@@ -195,6 +195,10 @@ class Menu {
 
    show () {
 
+      soundGeneratorAudioListener.gain.gain.value = 0;
+      let currentTime = soundGeneratorAudioListener.context.currentTime;
+      soundGeneratorAudioListener.gain.gain.linearRampToValueAtTime(1.0, currentTime+1.0);
+
       scene = new THREE.Scene();
       camera.remove (soundGeneratorAudioListener);
       let cameraFar = 1000;
